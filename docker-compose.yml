@@ -1,6 +1,16 @@
 version: "3"
 
 services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app
+      - node_modules:/app/node_modules
+    command: ["npm", "run", "serve"]
+
   backend:
     build:
       context: ./backend
@@ -9,33 +19,14 @@ services:
     volumes:
       - ./backend:/app
 
-  frontend:
-    build:
-      context: ./frontend
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./frontend:/app
-      # node_modules」が随時上書きされてしまうため、vue-cli-serviceのパスが変更されている模様
-      #コンテナ側の「/app/node_modules」を専用のボリュームに指定してあげることで、リンクの上書きさせないことで解決
-      - node_modules:/app/node_modules
-
-  db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: bulletin_board
-    ports:
-      - "3306:3306"
   nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    build:
+      context: ./nginx
     ports:
       - "80:80"
     depends_on:
       - frontend
       - backend
-# 追加
-volumes: 
+
+volumes:
   node_modules:
